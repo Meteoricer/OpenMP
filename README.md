@@ -3,3 +3,5 @@
 Playing with open
 
 Not sure if this working
+
+It seems like the polymer is still drifting. Need to dig into C++ random number generator
