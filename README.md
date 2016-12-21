@@ -10,3 +10,4 @@ Now i roughly have a idea
 THe presentation is finished, now i might need to think it as a long term project
 now i have time, i can make more change to it
 learning linux
+Not sure i should use vector or list
