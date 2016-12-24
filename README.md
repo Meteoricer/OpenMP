@@ -12,3 +12,4 @@ now i have time, i can make more change to it
 learning linux
 Not sure i should use vector or list
 will this actually be faster?
+keep doing openmp
