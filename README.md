@@ -1,3 +1,4 @@
+
 # OpenMP
 # Trying to do openMP with my code
 Playing with open
@@ -13,3 +14,4 @@ learning linux
 Not sure i should use vector or list
 will this actually be faster?
 keep doing openmp
+tried with vector, but when add or delete a element in vector will have a result that all the iterator is invalid, so it is not possible to use vector anymore.
