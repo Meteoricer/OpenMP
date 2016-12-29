@@ -6,3 +6,4 @@ But for diffusion, how did i deal with the sum of diffusion (propensity) and mor
 this is finished, now the problem is debundling, when they are the same bundling, when debundling, how can i solve the problem that i will need to construct the whole bundle when it will end up in the same bundling?
 Now the speed is 60 minute for 17.34 second
 Debundling is finished. Now deal with diffusion
+Now the speed is 60 minute for 23.73 second, there is not a big speed up as it should be (now the time for debundling is roughly the same as bundling, so in theory there is a 2 time speed up), maybe because of check sumps?
