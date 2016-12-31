@@ -9,4 +9,4 @@ Debundling is finished. Now deal with diffusion
 Now the speed is 60 minute for 23.73 second, there is not a big speed up as it should be (now the time for debundling is roughly the same as bundling, so in theory there is a 2 time speed up), maybe because of check sumps?
 Maybe the problem is rotation? Now i change rotation that after 100 times it does rotation for every possible polymer_unit,
 60 minute for about 34 second
-the drifting problem is still there, i tried both with hydrolysis and without hydrolysis, it is still there, and i don't know why.
+#the drifting problem is still there, i tried both with hydrolysis and without hydrolysis, it is still there, and i don't know why.
