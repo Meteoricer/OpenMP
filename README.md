@@ -10,4 +10,4 @@ Now the speed is 60 minute for 23.73 second, there is not a big speed up as it s
 Maybe the problem is rotation? Now i change rotation that after 100 times it does rotation for every possible polymer_unit,
 60 minute for about 34 second
 #the drifting problem is still there, i tried both with hydrolysis and without hydrolysis, it is still there, and i don't know why.
-start digging into it.
+#The problem maybe because of polarize?
