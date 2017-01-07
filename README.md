@@ -12,3 +12,4 @@ Maybe the problem is rotation? Now i change rotation that after 100 times it 
 #the drifting problem is still there, i tried both with hydrolysis and without hydrolysis, it is still there, and i don't know why.
 #The problem maybe because of polarize?
 recorded several reaction direction result, there is about 5/1000 difference, but it is not much. Should not because of this.
+still don't know the origin
