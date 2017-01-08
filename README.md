@@ -1,4 +1,4 @@
-still testing
+still working
 Now the problem is bundling, debundling and diffusion
 for bundling, the problem might be that even for cases that it have more than 2 anchor, it still need to calculate diffusion, it will take a lot of time.
 Also, for bundling, i might need to merge the small part into the big part.
@@ -13,3 +13,4 @@ Maybe the problem is rotation? Now i change rotation that after 100 times it 
 #The problem maybe because of polarize?
 recorded several reaction direction result, there is about 5/1000 difference, but it is not much. Should not because of this.
 still don't know the origin
+I'm doing multiple test to see if it will have the same drifting
