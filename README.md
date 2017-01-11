@@ -15,3 +15,4 @@ recorded several reaction direction result, there is about 5/1000 difference, bu
 still don't know the origin
 I'm doing multiple test to see if it will have the same drifting
 #maybe because of fragmentation?
+#it is because of fragmentation
