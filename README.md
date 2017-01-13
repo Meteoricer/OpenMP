@@ -17,3 +17,4 @@ I'm doing multiple test to see if it will have the same drifting
 #maybe because of fragmentation?
 #it is because of fragmentation
 it might be the random number generator of fragmentation
+#i need to think about the difference between fragmentation and dipolymerize
