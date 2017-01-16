@@ -19,3 +19,4 @@ I'm doing multiple test to see if it will have the same drifting
 it might be the random number generator of fragmentation
 #i need to think about the difference between fragmentation and dipolymerize
 i thought this should be becuase of hydrolysis, fixed hydrolysis(maybe?)
+checking different DT and TD cases, seems this is the origin
