@@ -18,4 +18,4 @@ I'm doing multiple test to see if it will have the same drifting
 #it is because of fragmentation
 it might be the random number generator of fragmentation
 #i need to think about the difference between fragmentation and dipolymerize
-still not fixed yet
+i thought this should be becuase of hydrolysis, fixed hydrolysis(maybe?)
