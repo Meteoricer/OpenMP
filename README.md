@@ -1,4 +1,4 @@
-still working
+#still working
 Now the problem is bundling, debundling and diffusion
 for bundling, the problem might be that even for cases that it have more than 2 anchor, it still need to calculate diffusion, it will take a lot of time.
 Also, for bundling, i might need to merge the small part into the big part.
@@ -21,3 +21,4 @@ it might be the random number generator of fragmentation
 i thought this should be becuase of hydrolysis, fixed hydrolysis(maybe?)
 checking different DT and TD cases, seems this is the origin
 #for hydrolysis, i can't get all the DTD case to be dissapear. It is strange.
+#should be annealing
