@@ -21,4 +21,4 @@ it might be the random number generator of fragmentation
 i thought this should be becuase of hydrolysis, fixed hydrolysis(maybe?)
 checking different DT and TD cases, seems this is the origin
 #for hydrolysis, i can't get all the DTD case to be dissapear. It is strange.
-#should be annealing
+#should be annealing, the difference might be small or large, i'll need to check it.
