@@ -23,3 +23,4 @@ checking different DT and TD cases, seems this is the origin
 #for hydrolysis, i can't get all the DTD case to be dissapear. It is strange.
 #should be annealing, the difference might be small or large, i'll need to check it.
 #check the fragmentation, should not result from it.
+now i have the problem that it won't stay there
