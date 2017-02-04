@@ -3,7 +3,7 @@ Now the driffting problem is solved, i need to tune the parameters so that it wi
 Some of the rate are off, i need to rethink it.
 25-26 midnight change polymerize vertical rate from 0.1 to 0.05
 learning tensorflow and baysian
-testrun: attatch:250
-new test: attatch:100
+testrun: deanchoring 8
+new test: deanchoring 10
 everything: fragmentation 0.1
 getting close
