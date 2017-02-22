@@ -1,11 +1,11 @@
-data=load('output - Copy.txt');
+%data=load('output - Copy.txt');
 col_num=600;
 row_num=800;
-figure(1);
-filename='test.gif';
+% figure(1);
+% filename='test.gif';
 temp=zeros(col_num+2:row_num+2:3);
-orient_data=zeros(1800,2);
-test_data=zeros(1800);
+orient_data=zeros(3000,2);
+test_data=zeros(3000,6);
 %temp=zeros(col_num,row_num,1,600);
 %M=moviein(20);
 i=1;
@@ -20,7 +20,7 @@ for j=1:1:row_num+2
     temp(i,j,2)=0;
     temp(i,j,3)=0;
 end
-for f=1:1:1800
+for f=1:1:3000
     %temp=zeros(col_num+2,row_num+2);
    
     for i=2:1:col_num+1
@@ -42,16 +42,21 @@ for f=1:1:1800
                      temp(i,j,2)=0;
                      temp(i,j,3)=0;
                      orient_data(f,1)=orient_data(f,1)+1;
-                     if (j>130 && j<280)&&(i>200&&i<400)
-                         test_data(f)=test_data(f)+1;
+                     for k=0:1:5
+                         if (j>130 && j<280)&&(i>k*100&&i<(k+1)*100)
+                            test_data(f,k+1)=test_data(f,k+1)+1;
+                         end
                      end
+                     
                 case 2
                      temp(i,j,1)=0;
                      temp(i,j,2)=0;
                      temp(i,j,3)=255;
                      orient_data(f,2)=orient_data(f,2)+1;
-                     if (j>130 && j<280)&&(i>200&&i<400)
-                         test_data(f)=test_data(f)+1;
+                      for k=0:1:5
+                         if (j>130 && j<280)&&(i>k*100&&i<(k+1)*100)
+                            test_data(f,k+1)=test_data(f,k+1)+1;
+                         end
                      end
                 case 3
                      temp(i,j,1)=0;
@@ -63,15 +68,15 @@ for f=1:1:1800
         end
 
     end
-    imshow(temp);
-    frame = getframe;
-    im = frame2im(frame);
-    [A,map]=rgb2ind(im,256);
-    if f==1
-        imwrite(A,map,filename,'gif','LoopCount',inf,'DelayTime',0.1);
-    else 
-        imwrite(A,map,filename,'gif','WriteMode','append','DelayTime',0.1);
-    end
+%     imshow(temp);
+%     frame = getframe;
+%     im = frame2im(frame);
+%     [A,map]=rgb2ind(im,256);
+%     if f==1
+%         imwrite(A,map,filename,'gif','LoopCount',inf,'DelayTime',0.1);
+%     else 
+%         imwrite(A,map,filename,'gif','WriteMode','append','DelayTime',0.1);
+%     end
    
     %M(:,f)=getframe;
 end
