@@ -1,3 +1,4 @@
+
 template<typename Unit>
 int get_position(list<Unit> *unit_list, typename list<Unit>::iterator unit_iter)
 {
@@ -32,5 +33,9 @@ int get_position(list<Unit> *unit_list, typename list<Unit>::iterator unit_iter)
 		position = -1;
 	}
 	//cout << "position:" << position << endl;
+	for (int j = direction_up; j <= direction_right; j++)
+		{
+			polymer_cluster_in >> polymer_cluster_iter->availabe_polymerize_direction[j];
+		}
 	return position;
 };
