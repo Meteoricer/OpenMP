@@ -112,7 +112,7 @@ public:
 	double TT_depolymerize_minus_rate = 2;//1;//8;//80#1
 	double TD_depolymerize_minus_rate = TT_depolymerize_minus_rate * 40;//5;//20;//#5
 	double DD_depolymerize_minus_rate = TD_depolymerize_minus_rate * 40;//10;//40;//#5
-	double TT_depolymerize_plus_rate = TT_depolymerize_minus_rate / 10;//1;//8;//80#1
+	double TT_depolymerize_plus_rate = TT_depolymerize_minus_rate / 40;//1;//8;//80#1
 	double TD_depolymerize_plus_rate = TT_depolymerize_plus_rate * 40;//5;//20;//#5
 	double DD_depolymerize_plus_rate = TD_depolymerize_plus_rate * 40;//10;//40;//#5
 	double depolymerize_rate = 20;
@@ -121,7 +121,7 @@ public:
 	double both = 200;
 
 	double hydrolysis_rate = 0.1150;
-	double hydrolysis_multiplier = 2;
+	double hydrolysis_multiplier = 10;
 	double TTT_hydrolysys_rate = 0.0985;//0.5;//2;//10;//100;//100;
 	double TTD_hydrolysys_rate = TTT_hydrolysys_rate * hydrolysis_multiplier;//1;//20;//20;// 100;//100;
 	double DTD_hydrolysys_rate = TTD_hydrolysys_rate * hydrolysis_multiplier;//2;//40;//10;// 100;//100;
