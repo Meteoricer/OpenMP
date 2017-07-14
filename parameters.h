@@ -121,7 +121,7 @@ public:
 	double both = 200;
 
 	double hydrolysis_rate = 0.1150;
-	double hydrolysis_multiplier = 10;
+	double hydrolysis_multiplier = 2;
 	double TTT_hydrolysys_rate = 0.0985;//0.5;//2;//10;//100;//100;
 	double TTD_hydrolysys_rate = TTT_hydrolysys_rate * hydrolysis_multiplier;//1;//20;//20;// 100;//100;
 	double DTD_hydrolysys_rate = TTD_hydrolysys_rate * hydrolysis_multiplier;//2;//40;//10;// 100;//100;
