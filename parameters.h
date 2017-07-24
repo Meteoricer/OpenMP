@@ -110,11 +110,12 @@ public:
 	double TD_fragmentation_rate = 0.01;//3;// 8;#
 	double DD_fragmentation_rate = 0.1;//5;//8;#5
 	double TT_depolymerize_minus_rate = 1;//1;//8;//80#1
-	double TD_depolymerize_minus_rate = TT_depolymerize_minus_rate * 80;//5;//20;//#5
-	double DD_depolymerize_minus_rate = TD_depolymerize_minus_rate * 80;//10;//40;//#5
+	double depolymerize_multiplier=100;
+	double TD_depolymerize_minus_rate = TT_depolymerize_minus_rate * depolymerize_multiplier;//5;//20;//#5
+	double DD_depolymerize_minus_rate = TD_depolymerize_minus_rate * depolymerize_multiplier;//10;//40;//#5
 	double TT_depolymerize_plus_rate = TT_depolymerize_minus_rate / 80;//1;//8;//80#1
-	double TD_depolymerize_plus_rate = TT_depolymerize_plus_rate * 80;//5;//20;//#5
-	double DD_depolymerize_plus_rate = TD_depolymerize_plus_rate * 80;//10;//40;//#5
+	double TD_depolymerize_plus_rate = TT_depolymerize_plus_rate * depolymerize_multiplier;//5;//20;//#5
+	double DD_depolymerize_plus_rate = TD_depolymerize_plus_rate * depolymerize_multiplier;//10;//40;//#5
 	double depolymerize_rate = 20;
 	
 	double attatch_rate = 400;//100;//100//0.000001;
