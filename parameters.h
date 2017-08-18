@@ -121,7 +121,7 @@ public:
 	double attatch_rate = 400;//100;//100//0.000001;
 	double both = 200;
 
-	double hydrolysis_rate = 0.107/60*14/0.66;
+	double hydrolysis_rate = 0.66/60*14/0.66;
 	double hydrolysis_multiplier = 10;
 	double TTT_hydrolysys_rate = hydrolysis_rate;//0.5;//2;//10;//100;//100;
 	double TTD_hydrolysys_rate = TTT_hydrolysys_rate * hydrolysis_multiplier;//1;//20;//20;// 100;//100;
