@@ -1,0 +1,288 @@
+%temp_data=load('output - Copy.txt');
+%fid=fopen('output.txt');
+fid=fopen('output - Copy.txt');
+col_num=600;
+row_num=563;
+figure(1);
+filename='2D.gif';
+
+
+%------------------parameter region begin---------------------------
+ direction_up = 0;
+ direction_down = 1;
+ direction_left = 2;
+ direction_right = 3;
+ NoDirections=0;
+ horizontal = 1;
+ vertical = 2;
+
+ NoFtsZ = 0;
+ T = 1;
+ D = 2;
+ 
+ effect_rate = 0;
+ NoAnchorBelow = 0;
+ AnchorBelowWithoutBound = 1;
+ AnchorBelowWithBound = 2;
+ NoLateralBound = 0;
+ LateralBoundDirectionFirst = 1;
+ LateralBoundDirectionSecond = 2;
+ LateralBoundDIrectionBoth = 3;
+ Head = 1;
+ Tail = 2;
+ NotHeadOrTail = 0;
+ HeadAndTail = 3;
+ 
+ %------------------parameter region end---------------------------
+
+%data=zeros(col_num,col_num);
+line_number=0;
+begin=1;
+entropy_data=zeros(30,1);
+width=zeros(1,4800);
+length_of_ring=zeros(1,4800);
+polymer_average_length=zeros(1,4800);
+ring_length_critical=200;
+
+while 1
+nextline = fgetl(fid); %read a line 
+    if ~ischar(nextline)
+        fclose(fid);
+        break;
+    else
+        line_number = line_number + 1;
+        if(line_number>=begin)
+            FtsZ_Image=ones(col_num,row_num,3)*255;
+            Anchor_Grid=ones(col_num,row_num,3)*255;
+            Data_Grid=zeros(col_num,row_num);
+            profile_FtsZ=zeros(row_num,1);
+            
+            count=0;
+            temp_data=str2num(nextline);
+            %[width,length]=size(temp_data);
+            for i=2:2:length(temp_data)
+                %templa(i)=temp_data(i);
+                count=count+temp_data(i);
+                col=rem(count,row_num)+1;
+                row=floor(count/row_num)+1;
+                Data_Grid(row,col)=temp_data(i+1);
+                %data(row,col)=temp_data(i);
+                switch floor(temp_data(i+1)/1000)-floor(temp_data(i+1)/10000)*10
+                    case T
+                        profile_FtsZ(col)=profile_FtsZ(col)+1;
+                        FtsZ_Image(row,col,1)=255;
+                        FtsZ_Image(row,col,2)=0;
+                        FtsZ_Image(row,col,3)=0;
+                    case D
+                        profile_FtsZ(col)=profile_FtsZ(col)+1;
+                        FtsZ_Image(row,col,1)=0;
+                        FtsZ_Image(row,col,2)=0;
+                        FtsZ_Image(row,col,3)=255;
+                
+                end
+                 switch floor(temp_data(i+1)/10000)
+                    case AnchorBelowWithBound
+                        %Anchor_Grid_Grid(row,col,1)=255;
+                        Anchor_Grid(row,col,2)=0;
+                        Anchor_Grid(row,col,3)=0;
+                    case AnchorBelowWithoutBound
+                        Anchor_Grid(row,col,1)=0;
+                        Anchor_Grid(row,col,2)=0;
+                        %FtsZ_Image(row,col,3)=255;
+                 end
+                
+
+
+            end
+           
+            %entropy_data=entropy_data+matrix_entropy_profile(FtsZ_Image(:,:,1));
+            %entropy_data(line_number)=entropy(FtsZ_Image);
+            
+            
+            
+            
+            
+%-------------------------determine the ring region begin-------------------------
+            temp_max=max(profile_FtsZ);
+            length_of_ring(line_number)=temp_max;
+            if(temp_max>=ring_length_critical)
+
+    %             num_ftsz_in_ring(line_number)=sum(profile_FtsZ(find(profile_FtsZ>=0.5*max(profile_FtsZ))));
+    %             right=max(find(profile_FtsZ>=0.2*max(profile_FtsZ)))+10;
+    %             left= min(find(profile_FtsZ>=0.2*max(profile_FtsZ)))-10;
+    %             width(line_number)=right-left-20;
+                  center=find(profile_FtsZ==max(profile_FtsZ));
+                  %left side
+                  left_shift=center(1)-1;
+                  mark=0;
+                  while(left_shift>1&&mark<5)
+                      if(profile_FtsZ(left_shift)>max(profile_FtsZ)*0.2)
+
+                      else
+                          mark=mark+1;
+                      end
+                     left_shift=left_shift-1;
+                  end
+                  left=left_shift;
+                  right_shift=center(1)+1;
+                  mark=0;
+                  while(right_shift<row_num&&mark<5)
+                      if(profile_FtsZ(right_shift)>max(profile_FtsZ)*0.2)
+
+                      else
+                          mark=mark+1;
+                      end
+                     right_shift=right_shift+1;
+                  end
+                  right=right_shift;
+                  %num_ftsz_in_ring(line_number)=sum(profile_FtsZ(left:right));
+                  %num_ftsA_in_ring(line_number)=sum(profile_A(left:right));
+                  %number_of_AF_in_ring(line_number)=sum(profile_AF(left:right));
+                  width(line_number)=right-left;
+            end
+            
+%-------------------------determine the ring region end-------------------------          
+            
+
+
+%-------------------------calculate polymer length begin-------------------
+            T_Distance_Data=zeros(1,col_num);
+            D_Distance_Data=zeros(1,col_num);
+            if(length_of_ring(line_number)>=ring_length_critical)
+                count=0;
+                polymer_length_sum=0;
+                polymer_count=0;
+                
+                for i=2:2:length(temp_data)
+                %templa(i)=temp_data(i);
+                    count=count+temp_data(i);
+                    col=rem(count,row_num)+1;
+                    row=floor(count/row_num)+1;
+                    T_Distance_To_Tail=0;
+                    D_Distance_To_Tail=0;
+                    %data(row,col)=temp_data(i);
+                    if(floor(temp_data(i+1)/1000)-floor(temp_data(i+1)/10000)*10~=NoFtsZ)
+                        if(col>=left && col<=right)
+                            if(mod(temp_data(i+1),10)==HeadAndTail)
+                                    polymer_length_sum=polymer_length_sum+1;
+                                    polymer_count=polymer_count+1;
+                                    switch floor(temp_data(i+1)/1000)-floor(temp_data(i+1)/10000)*10
+                                        case T
+                                            T_Distance_Data(1)=T_Distance_Data(1)+1;
+                                        case D
+                                            D_Distance_Data(1)=D_Distance_Data(1)+1;
+
+                                    end 
+                                    
+                            elseif(mod(temp_data(i+1),10)==Tail)
+                                switch (mod(temp_data(i+1),100)-mod(temp_data(i+1),10))/10
+                                    case direction_up
+                                        
+                                        switch floor(temp_data(i+1)/1000)-floor(temp_data(i+1)/10000)*10
+                                            case T
+                                                T_Distance_To_Tail=T_Distance_To_Tail+1;
+                                            case D
+                                                D_Distance_To_Tail=D_Distance_To_Tail+1;
+
+                                        end 
+                                        polymer_length_sum=polymer_length_sum+1;
+                                        while mod(Data_Grid(row,col),10)~=Head
+                                            if(row==col_num)
+                                                row=1;
+                                            else
+                                                row=row+1;
+                                            end
+                                            switch floor(temp_data(i+1)/1000)-floor(temp_data(i+1)/10000)*10
+                                                case T
+                                                    T_Distance_To_Tail=T_Distance_To_Tail+1;
+                                                case D
+                                                    D_Distance_To_Tail=D_Distance_To_Tail+1;
+
+                                            end 
+                                            polymer_length_sum=polymer_length_sum+1;
+                                        end
+                                        polymer_count=polymer_count+1;                           
+                                    case direction_down
+                                        switch floor(temp_data(i+1)/1000)-floor(temp_data(i+1)/10000)*10
+                                            case T
+                                                T_Distance_To_Tail=T_Distance_To_Tail+1;
+                                            case D
+                                                D_Distance_To_Tail=D_Distance_To_Tail+1;
+
+                                        end 
+                                        polymer_length_sum=polymer_length_sum+1;
+                                        while mod(Data_Grid(row,col),10)~=Head
+                                            if(row==1)
+                                                row=col_num;
+                                            else
+                                                row=row-1;
+                                            end
+                                            switch floor(temp_data(i+1)/1000)-floor(temp_data(i+1)/10000)*10
+                                                case T
+                                                    T_Distance_To_Tail=T_Distance_To_Tail+1;
+                                                case D
+                                                    D_Distance_To_Tail=D_Distance_To_Tail+1;
+
+                                            end 
+                                            polymer_length_sum=polymer_length_sum+1;
+
+                                        end
+                                        switch floor(temp_data(i+1)/1000)-floor(temp_data(i+1)/10000)*10
+                                            case T
+                                                T_Distance_Data(T_Distance_To_Tail)=T_Distance_Data(T_Distance_To_Tail)+1;
+                                            case D
+                                                D_Distance_Data(D_Distance_To_Tail)=D_Distance_Data(D_Distance_To_Tail)+1;
+
+                                        end 
+
+                                        polymer_count=polymer_count+1;      
+                                end
+                            end            
+                        end                
+                    end
+                end
+                polymer_average_length(line_number)=polymer_length_sum/polymer_count;
+            end
+            
+            
+            
+            
+            
+%-------------------------calculate polymer length end-------------------          
+            plot(T_Distance_Data);
+            hold on
+            plot(D_Distance_Data);
+            hold off
+            legend('T Distance To Tail','D Distance To Tail');
+            xlabel('Distance To Tail, Unit=Grid Length,5nm', 'fontsize', 8)
+            ylabel('number of such Distance to Tail', 'fontsize', 8)
+            axis([0 100 0 100])
+            %imshow(FtsZ_Image);
+            disp([line_number]);
+            frame = getframe(gcf);
+            im = frame2im(frame);
+            [A,map]=rgb2ind(im,256);
+            if line_number==begin
+                imwrite(A,map,filename,'gif','LoopCount',inf,'DelayTime',0.04);
+            else 
+                imwrite(A,map,filename,'gif','WriteMode','append','DelayTime',0.04);
+            end
+        end
+        
+        
+
+       
+    end
+end 
+test_data=zeros(3000,6);
+entropy_data=entropy_data/(line_number-begin);
+%plot(polymer_average_length)
+%plot(entropy_data)
+%entropy_data2=entropy_data((entropy_data)>0.0001);
+
+% for f=1:1:3000
+%     for i=2:2:length(temp_data(f))
+%         temp_data(f,i)
+%     end
+% end
+
