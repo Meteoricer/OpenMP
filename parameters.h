@@ -112,10 +112,10 @@ public:
 	double TT_annealing_rate = 100;//2500;
 	double TD_annealing_rate = 1;
 	double fragmentation_multiplier = 100;
-	double TT_fragmentation_rate = 0.5;//1;//8; #
+	double TT_fragmentation_rate = 1;//1;//8; #
 	double TD_fragmentation_rate = TT_fragmentation_rate*fragmentation_multiplier;//3;// 8;#
 	double DD_fragmentation_rate = TD_fragmentation_rate*fragmentation_multiplier;//5;//8;#5
-	double TT_depolymerize_minus_rate = 0.5;//1;//8;//80#1
+	double TT_depolymerize_minus_rate = 1;//1;//8;//80#1
 	double depolymerize_multiplier = fragmentation_multiplier;
 	double TD_depolymerize_minus_rate = TT_depolymerize_minus_rate * depolymerize_multiplier;//5;//20;//#5
 	double DD_depolymerize_minus_rate = TD_depolymerize_minus_rate * depolymerize_multiplier;//10;//40;//#5
