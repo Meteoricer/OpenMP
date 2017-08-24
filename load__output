@@ -1,6 +1,6 @@
 %temp_data=load('output - Copy.txt');
-%fid=fopen('output.txt');
-fid=fopen('output - Copy.txt');
+fid=fopen('output.txt');
+%fid=fopen('output - Copy.txt');
 col_num=600;
 row_num=563;
 figure(1);
@@ -42,7 +42,20 @@ entropy_data=zeros(30,1);
 width=zeros(1,4800);
 length_of_ring=zeros(1,4800);
 polymer_average_length=zeros(1,4800);
+image_polymer_average_length=zeros(1,4800);
 ring_length_critical=200;
+T_Distance_Data_Global=zeros(1,col_num);
+number_of_D=zeros(1,4800);
+number_of_T=zeros(1,4800);
+D_Distance_Data_Global=zeros(1,col_num);
+num_ftsz_in_ring=zeros(1,4800);
+num_ftsA_in_ring=zeros(1,4800);
+time_series_output=zeros(1,4800);
+number_of_up=zeros(1,4800);
+number_of_down=zeros(1,4800);
+number_of_AF=zeros(1,4800);
+number_of_AF_in_ring=zeros(1,4800);
+ring_count=0;
 
 while 1
 nextline = fgetl(fid); %read a line 
@@ -56,11 +69,14 @@ nextline = fgetl(fid); %read a line
             Anchor_Grid=ones(col_num,row_num,3)*255;
             Data_Grid=zeros(col_num,row_num);
             profile_FtsZ=zeros(row_num,1);
-            
+            profile_FtsA=zeros(row_num,1);
+            profile_AF=zeros(row_num,1);
             count=0;
+           
             temp_data=str2num(nextline);
+            time_series_output(line_number)=temp_data(1);
             %[width,length]=size(temp_data);
-            for i=2:2:length(temp_data)
+            for i=2:2:length(temp_data)-1
                 %templa(i)=temp_data(i);
                 count=count+temp_data(i);
                 col=rem(count,row_num)+1;
@@ -73,22 +89,34 @@ nextline = fgetl(fid); %read a line
                         FtsZ_Image(row,col,1)=255;
                         FtsZ_Image(row,col,2)=0;
                         FtsZ_Image(row,col,3)=0;
+                        number_of_T(line_number)=number_of_T(line_number)+1;
                     case D
                         profile_FtsZ(col)=profile_FtsZ(col)+1;
                         FtsZ_Image(row,col,1)=0;
                         FtsZ_Image(row,col,2)=0;
                         FtsZ_Image(row,col,3)=255;
+                        number_of_D(line_number)=number_of_D(line_number)+1;
                 
                 end
                  switch floor(temp_data(i+1)/10000)
                     case AnchorBelowWithBound
                         %Anchor_Grid_Grid(row,col,1)=255;
+                        profile_FtsA(col)=profile_FtsA(col)+1;
+                        number_of_AF(line_number)=number_of_AF(line_number)+1;
+                        profile_AF(col)=profile_AF(col)+1;
                         Anchor_Grid(row,col,2)=0;
                         Anchor_Grid(row,col,3)=0;
                     case AnchorBelowWithoutBound
+                        profile_FtsA(col)=profile_FtsA(col)+1;
                         Anchor_Grid(row,col,1)=0;
                         Anchor_Grid(row,col,2)=0;
                         %FtsZ_Image(row,col,3)=255;
+                 end
+                 switch (mod(temp_data(i+1),100)-mod(temp_data(i+1),10))/10
+                     case direction_up
+                        number_of_up(line_number)=number_of_up(line_number)+1;
+                     case direction_down
+                        number_of_down(line_number)=number_of_down(line_number)+1;
                  end
                 
 
@@ -112,6 +140,7 @@ nextline = fgetl(fid); %read a line
     %             left= min(find(profile_FtsZ>=0.2*max(profile_FtsZ)))-10;
     %             width(line_number)=right-left-20;
                   center=find(profile_FtsZ==max(profile_FtsZ));
+                  ring_count=ring_count+1;
                   %left side
                   left_shift=center(1)-1;
                   mark=0;
@@ -135,8 +164,9 @@ nextline = fgetl(fid); %read a line
                      right_shift=right_shift+1;
                   end
                   right=right_shift;
-                  %num_ftsz_in_ring(line_number)=sum(profile_FtsZ(left:right));
-                  %num_ftsA_in_ring(line_number)=sum(profile_A(left:right));
+                  num_ftsz_in_ring(line_number)=sum(profile_FtsZ(left:right));
+                  num_ftsA_in_ring(line_number)=sum(profile_FtsA(left:right));
+                  number_of_AF_in_ring(line_number)=sum(profile_AF(left:right));
                   %number_of_AF_in_ring(line_number)=sum(profile_AF(left:right));
                   width(line_number)=right-left;
             end
@@ -153,7 +183,7 @@ nextline = fgetl(fid); %read a line
                 polymer_length_sum=0;
                 polymer_count=0;
                 
-                for i=2:2:length(temp_data)
+                for i=2:2:length(temp_data)-1
                 %templa(i)=temp_data(i);
                     count=count+temp_data(i);
                     col=rem(count,row_num)+1;
@@ -242,6 +272,51 @@ nextline = fgetl(fid); %read a line
                     end
                 end
                 polymer_average_length(line_number)=polymer_length_sum/polymer_count;
+                
+                polymer_image_count=0;
+                polymer_image_length_sum=0;
+                %temp_length=0;
+                polymer_mark=0;
+                
+                for col_temp=left:1:right
+                    row_temp=1;
+                    
+                    while(row_temp<=col_num)
+                       if(floor(Data_Grid(row_temp,col_temp)/1000)-floor(Data_Grid(row_temp,col_temp)/10000)*10~=NoFtsZ)
+                           polymer_image_length_sum=polymer_image_length_sum+1;
+                           if(polymer_mark==0)
+                               polymer_mark=1;
+                               %temp_length=temp_length+1;
+                               %polymer_iamge_count=polymer_iamge_count+1;
+                               %polymer_image_length_sum=polymer_image_length_sum+1;
+                           end
+                               
+                          
+                       else
+                           if(polymer_mark==1)
+                               polymer_image_count=polymer_image_count+1;
+                               polymer_mark=0;
+                           end
+                       end
+                       row_temp=row_temp+1;
+                       
+                    end
+                    
+                    
+%                    for row_temp=1:1:col_num
+%                        if(floor(Data_Grid(row_temp,col_temp)/1000)-floor(Data_Grid(row,col)/10000)*10~=NoFtsZ)
+%                            if(polymer_mark==0)
+%                                polymer_mark=1;
+%                                %temp_length=temp_length+1;
+%                                polymer_iamge_count=polymer_iamge_count+1;
+%                                polymer_image_length_sum=polymer_image_length_sum+1;
+%                            else
+%                                polymer_image_length_sum=polymer_image_length_sum+1;
+%                            end
+%                        end
+%                    end
+                end
+                image_polymer_average_length(line_number)=polymer_image_length_sum/polymer_image_count;
             end
             
             
@@ -249,17 +324,20 @@ nextline = fgetl(fid); %read a line
             
             
 %-------------------------calculate polymer length end-------------------          
-            plot(T_Distance_Data);
-            hold on
-            plot(D_Distance_Data);
-            hold off
-            legend('T Distance To Tail','D Distance To Tail');
-            xlabel('Distance To Tail, Unit=Grid Length,5nm', 'fontsize', 8)
-            ylabel('number of such Distance to Tail', 'fontsize', 8)
-            axis([0 100 0 100])
-            %imshow(FtsZ_Image);
+%             plot(T_Distance_Data);
+%             hold on
+%             plot(D_Distance_Data);
+%             hold off
+%             legend('T Distance To Tail','D Distance To Tail');
+%             xlabel('Distance To Tail, Unit=Grid Length,5nm', 'fontsize', 8)
+%             ylabel('number of such Distance to Tail', 'fontsize', 8)
+%             axis([0 50 0 50])
+            T_Distance_Data_Global=T_Distance_Data_Global+T_Distance_Data;
+            D_Distance_Data_Global=D_Distance_Data_Global+D_Distance_Data;
+            imshow(FtsZ_Image);
             disp([line_number]);
-            frame = getframe(gcf);
+            frame = getframe();
+            %frame = getframe(gcf);
             im = frame2im(frame);
             [A,map]=rgb2ind(im,256);
             if line_number==begin
@@ -276,6 +354,8 @@ nextline = fgetl(fid); %read a line
 end 
 test_data=zeros(3000,6);
 entropy_data=entropy_data/(line_number-begin);
+T_Distance_Data_Global=T_Distance_Data_Global/ring_count;
+D_Distance_Data_Global=D_Distance_Data_Global/ring_count;
 %plot(polymer_average_length)
 %plot(entropy_data)
 %entropy_data2=entropy_data((entropy_data)>0.0001);
@@ -285,4 +365,37 @@ entropy_data=entropy_data/(line_number-begin);
 %         temp_data(f,i)
 %     end
 % end
+% plot(T_Distance_Data_Global);
+% hold on
+% plot(D_Distance_Data_Global);
+% hold off
+% legend('T Distance To Tail','D Distance To Tail');
+% xlabel('Distance To Tail, Unit=Grid Length,5nm', 'fontsize', 8)
+% ylabel('number of such Distance to Tail', 'fontsize', 8)
+% axis([0 100 0 50])
+
+plot(image_polymer_average_length)
+
+
+
+
+
+time_series_output=time_series_output(find(time_series_output~=0));
+num_ftsz_in_ring=num_ftsz_in_ring(1:round(2*max(time_series_output)));
+num_ftsA_in_ring=num_ftsA_in_ring(1:round(2*max(time_series_output)));
+width=width(1:round(2*max(time_series_output)));
+length_of_ring=length_of_ring(1:round(2*max(time_series_output)));
+number_of_up=number_of_up(1:round(2*max(time_series_output)));
+number_of_down=number_of_down(1:round(2*max(time_series_output)));
+number_of_T=number_of_T(1:round(2*max(time_series_output)));
+number_of_D=number_of_D(1:round(2*max(time_series_output)));
+number_of_AF=number_of_AF(1:round(2*max(time_series_output)));
+number_of_AF_in_ring=number_of_AF_in_ring(1:round(2*max(time_series_output)));
+polymer_average_length=polymer_average_length(1:round(2*max(time_series_output)));
+
+
+
+
+
+save('load_output.mat');
 
