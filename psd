@@ -1,0 +1,22 @@
+new_test_data=test_data;
+max_num=max(test_data);
+min_num=min(test_data(begin:end-1,:));
+
+
+critical=0.92;
+
+for i=begin:llength-1
+     if(length_of_ring(i)>=ring_length_critical)
+         
+         for k=1:1:num_boo
+             if(test_data(i,k)<max_num(k)*critical)
+                 new_test_data(i,k)=0;
+             else
+                 new_test_data(i,k)=1;
+             end
+         end
+         
+     end
+
+end
+psd
