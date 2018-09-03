@@ -1,0 +1,575 @@
+#include <vector>
+#include <iterator>
+#include <iostream>
+#include "parameters.h"
+#include "initialize.h"
+#include "Grid_Unit.h"
+#include "Rule_Structure.h"
+#include "Rule_Parameters.h"
+#include "test.h"
+//#include <sys/types.h>
+//#include <sys/stat.h>
+//include <stdlib.h>
+//#include <stdio.h>
+#include "General_Functions.h"
+#include <random>
+#include <omp.h>
+#include <fstream>
+//#include <direct.h>//adding this for _mkdir
+
+Rule_Structure rule_structure;
+Rule_Parameters rule_parameters;
+vector<vector<Grid_Unit>> Grid(rule_parameters.column_num, vector<Grid_Unit>(rule_parameters.row_num));//the grid we are using
+//vector<vector<Grid_Unit>> Polymer_Grid(column_num, vector<Grid_Unit>(row_num));//the grid we are using
+//vector<vector<Grid_Unit>> Polymer_Cluster_Grid(column_num, vector<Grid_Unit>(row_num));//the grid we are using
+
+
+
+
+using namespace std;
+int main()
+{
+	double tsave =0;
+	double tsave_delta = 50;
+	
+	//vector<vector<int> > AnchorGrid(column_num, vector<int>(row_num));
+	fstream savemark;
+	savemark.open("savemark.txt", ios::in);
+	if (!savemark)
+	{
+		LoadRuleParameters();
+		//cout << rule_parameters.typical_row << endl;
+		cout << "no savemark, begin simulation" << endl;
+		system("pause");
+		
+		Initialize();
+		cout << rule_parameters.sumps << endl;
+		cout << rule_parameters.scale_factor << endl;
+		cout << "Initialize complete" << endl;
+		rule_parameters.t = 0;
+	}
+	else
+	{
+		cout << "savemark found, begin resumming simulation" << endl;
+		//system("pause");
+		LoadAllParameters();
+		LoadAllObject();
+		initialize_diffusion_propensity();
+		int savemark_num = 0;
+		savemark >> savemark_num;
+		if (savemark_num == 2)
+		{
+			cout << "begin frap" << endl;
+			int left;
+			int right;
+			int up;
+			int down;
+			savemark >> left;
+			savemark >> right;
+			//rule_parameters.left_bound = left;
+			//rule_parameters.right_bound = right;
+			up = rule_parameters.column_num;
+			down = 0;
+			//savemark >> up;
+			//savemark >> down;
+			cout << "do frap on region: left-" << left << ", right-" << right << endl;
+			frap(left,right,up,down);
+		}
+		if(savemark_num==3)
+		{
+			cout << "begin event analysis" << endl;
+			rule_parameters.event_analysis = 1;
+		}
+		if (savemark_num == 4)
+		{
+			cout << "biased diffusion analysis" << endl;
+			
+			
+			savemark >> rule_parameters.event_left;
+			savemark >> rule_parameters.event_right;
+			//rule_parameters.left_bound = left;
+			//rule_parameters.right_bound = right;
+			
+			//savemark >> up;
+			//savemark >> down;
+			rule_parameters.event_analysis = 4;
+			cout << "analyse on : left-" << left << ", right-" << right << endl;
+			
+		}
+		system("pause");
+		//tsave = rule_parameters.t + 600;
+	}
+	
+	//system("pause");
+	//cout << "empty anchor: " << rule_parameters.empty_anchor_unit_num << endl;
+	//Grid grid;
+	double fidx = 2400;//total time
+	double tjudge = 0;
+	double tbase = 300;
+	double tdelta=0.5;//how much time it take to save a output file
+	double t_average = 0.000005;
+	double tdelta2 = 0.1;//how much time it take to print screen
+	
+	double ttemp = 0.000000001;
+	
+	char output_dir[120];
+	//char output_file[120];
+	char fname[120];
+	cin;
+	ofstream fout;
+	//snprintf(output_dir, sizeof(output_dir), ".//%s%3.3lf/", "time", rule_parameters.t);
+	/*_mkdir(output_dir);
+	snprintf(fname, sizeof(fname), "%s%s", output_dir, "testmatrix.txt");*/
+	fout.open("output.txt",std::fstream::app);
+
+	ofstream statistics;
+	statistics.open("statistics.txt", std::fstream::app);
+	ofstream length_distribution;
+	length_distribution.open("length_distribution.txt", std::fstream::app);
+	ofstream length_column;
+	length_column.open("length_column.txt", std::fstream::app);
+	ofstream diffusion_statistics;
+	diffusion_statistics.open("diffusion_statistics.txt", std::fstream::app);
+	ofstream fragmentation_statistics;
+	fragmentation_statistics.open("fragmentation_statistics.txt", std::fstream::app);
+	ofstream depolymerization_statistics;
+	depolymerization_statistics.open("depolymerization_statistics.txt", std::fstream::app);
+	ofstream averaged_output;
+	averaged_output.open("averaged_output.txt", std::fstream::app);
+	ofstream polymerize_statistics;
+	polymerize_statistics.open("polymerize_statistics.txt", std::fstream::app);
+	ofstream remove_statistics;
+	remove_statistics.open("remove_statistics.txt", std::fstream::app);
+	rule_parameters.event_output.open("event_analysis.txt");
+
+
+	int averaged_output_output_mark = 0;
+	vector<vector<int>> average_map(rule_parameters.column_num, vector<int>(rule_parameters.row_num));
+	for (int i = 0; i < rule_parameters.column_num; i++)
+	{
+		for (int j = 0; j < rule_parameters.row_num; j++)
+		{
+			average_map[i][j] = 0;
+		}
+	}
+	//output(fout);
+	/*if (tjudge > tbase)
+		tjudge = tbase;*/
+	//tjudge = tbase + tjudge;
+	while (rule_parameters.t <= fidx)
+	{
+		
+		//cout << output_dir << endl;
+	
+		if (rule_parameters.t > tsave)
+		{
+			//cout << "Simulation saved" << endl;
+			//system("pause");
+			SaveAllParameters();
+			SaveAllObject();
+			cout << "Simulation saved" << endl;
+			//system("pause");
+			tsave = tsave + tsave_delta;
+		}
+
+
+		if (rule_parameters.t >= tjudge - t_average && rule_parameters.t <= tjudge + t_average)
+		{
+			//if (averaged_output_output_mark == 0)
+			//{
+			//	//averaged_output_output_mark = 1;
+			//	for (int i = 0; i < rule_parameters.column_num; i++)
+			//	{
+			//		for (int j = 0; j < rule_parameters.row_num; j++)
+			//		{
+			//			average_map[i][j] = 0;
+			//		}
+			//	}
+			//}
+			
+			averaged_output_output_mark++;
+			
+
+			for (int i = 0; i < rule_parameters.column_num; i++)
+			{
+				for (int j = 0; j < rule_parameters.row_num; j++)
+				{
+					if (&*Grid[i][j].grid_polymer_unit_pointer != &*rule_structure.polymer_unit_list_end.begin())
+					{
+						average_map[i][j] ++;
+					}
+				}
+			}
+			
+		}
+		else
+		{
+			if (averaged_output_output_mark != 0 && rule_parameters.t>0.1)
+			{
+				
+				//output
+
+
+				//fout << rule_parameters.t << " ";
+				int count = 0;
+				int zero_count = 1;
+				for (int i = 0; i < rule_parameters.column_num; i++)
+				{
+					for (int j = 0; j < rule_parameters.row_num; j++)
+					{
+
+
+
+						if (average_map[i][j] == 0)
+						{
+
+
+							//fout << 0 << " ";
+							count++;
+							zero_count++;
+
+						}
+						else
+						{//there is FtsZ
+							averaged_output <<zero_count<<" "<< double(average_map[i][j]) / double(averaged_output_output_mark) << " ";
+							//cout << (double)average_map[i][j] <<" "<< (double)averaged_output_output_mark <<" "<< double(average_map[i][j]) / double(averaged_output_output_mark) << endl;;
+							//system("pause");
+							zero_count = 1;
+							count++;
+							average_map[i][j] = 0;
+
+						}
+					}
+
+
+				}
+				averaged_output << endl;
+				averaged_output_output_mark = 0;
+
+
+			}
+		}
+
+
+
+		if (rule_parameters.t >= tjudge)
+		{
+
+			
+			//snprintf(output_dir, sizeof(output_dir), ".//%s%3.3lf/", "time", rule_parameters.t);
+			//_mkdir(output_dir);
+			
+			//snprintf(fname, sizeof(fname), "%s%s", output_dir, "testmatrix.txt");
+			//cout << fname << endl;
+			//system("pause");
+			
+			//validate_diffusion_propensity();
+			//cout << "output" << endl;
+
+			//this is where i do output
+			output(fout);
+			
+			//check_average_length_per_column();
+			/*for (int i = 0; i < rule_parameters.row_num; i++)
+			{
+				length_column << rule_parameters.average_length_per_column[i] << " " << rule_parameters.polymer_count[i] <<" ";;
+			}
+			length_column << endl;*/
+
+
+			//check_length_distribution();
+			/*for (int i = 0; i < rule_parameters.column_num; i++)
+			{
+				length_distribution<<rule_parameters.length_distribution[i]<<" ";
+			}
+			length_distribution << endl;*/
+
+			ofstream timeout;
+			timeout.open("time.txt");
+			for (int i = 0; i < num_of_rules+1; i++)
+			{
+				timeout << i<<" "<<rule_parameters.time[i] << endl;
+			}
+			timeout.close();
+
+			ofstream countout;
+			countout.open("count.txt");
+			for (int i = 0; i < num_of_rules; i++)
+			{
+				countout << i<<" "<<rule_parameters.count[i] << endl;
+			}
+			countout.close();
+
+
+			for (int i = 0; i < rule_parameters.row_num; i++)
+			{
+				for (int j = 0; j < 4; j++)
+				{
+					diffusion_statistics << rule_parameters.diffusion_statistics[i][j] << " ";
+					rule_parameters.diffusion_statistics[i][j] = 0;
+				}
+				
+			}
+			diffusion_statistics << endl;
+
+			for (int i = 0; i < rule_parameters.row_num; i++)
+			{
+				for (int j = 0; j < 4; j++)
+				{
+					polymerize_statistics << rule_parameters.polymerize_statistics[i][j] << " ";
+					rule_parameters.polymerize_statistics[i][j] = 0;
+				}
+
+			}
+			polymerize_statistics << endl;
+
+
+
+
+			for (int i = 0; i < rule_parameters.row_num; i++)
+			{
+				
+				depolymerization_statistics << rule_parameters.depolymerization_statistics[i] << " ";
+				rule_parameters.depolymerization_statistics[i] = 0;
+				
+
+			}
+			depolymerization_statistics << endl;
+			for (int i = 0; i < rule_parameters.row_num; i++)
+			{
+
+				fragmentation_statistics << rule_parameters.fragmentation_statistics[i] << " ";
+				rule_parameters.fragmentation_statistics[i] = 0;
+
+
+			}
+			fragmentation_statistics << endl;
+
+
+			
+
+
+		
+
+
+			ofstream direction;
+			direction.open("direction.txt");
+			for (int i = 0; i < num_of_rules; i++)
+			{
+				direction << i << ": ";
+				for (int j = 0; j < 4; j++)
+				{
+					direction << rule_parameters.direction_record[i][j] << " ";
+				}
+				direction << endl;
+			}
+			//int TD_case = 0;//T------D
+			//int DT_case = 0;//D------T
+			//int TT_case = 0;//T------T
+			//int DD_case = 0;//D------D
+			//int double_sum;
+			
+			direction << "TT: " << rule_parameters.TT_case << endl;
+			direction << "TD: " << rule_parameters.TD_case << endl;
+			direction << "DT: " << rule_parameters.DT_case << endl;
+			direction << "DD: " << rule_parameters.DD_case << endl;
+			direction << "TTT sum: " << rule_parameters.TTT_sum_total << endl;
+			direction << "TTD sum: " << rule_parameters.TTD_sum_total << endl;
+			direction << "DTD sum: " << rule_parameters.DTD_sum_total << endl;
+			direction << "fragmentation TT: " << rule_parameters.TT_fragmentation_sum<<endl;
+			direction << "fragmentation TD: " << rule_parameters.TD_fragmentation_sum << endl;;
+			direction << "fragmentation DD: " << rule_parameters.DD_fragmentation_sum << endl;;
+			direction << "depolymerization TT: " << rule_parameters.TT_depolymerize_minus_end_sum << endl;
+			direction << "depolymerization TD: " << rule_parameters.TD_depolymerize_minus_end_sum << endl;
+			direction << "depolymerization DD: " << rule_parameters.DD_depolymerize_minus_end_sum << endl;
+			direction << "PS:" << endl;
+			for (int i = 0; i < rule_parameters.ps.size(); i++)
+			{
+				direction << i << ": " << rule_parameters.ps[i] << endl;
+			}
+			direction << "up is larger than down for annealing: " << rule_parameters.up_larger_than_down_annealing << endl;
+			direction << "up is larger than down for fragmentation: " << rule_parameters.up_larger_than_down_fragmentation << endl;
+			direction << "TT up is larger than down for annealing: " << rule_parameters.TT_annealing_count_up_larger_than_below << endl;
+			direction << "TT up is smaller than down for annealing: " << rule_parameters.TT_annealing_count_up_smaller_than_below << endl;
+			direction << "TD up is larger than down for annealing: " << rule_parameters.TD_annealing_count_up_larger_than_below << endl;
+			direction << "TD up is smaller than down for annealing: " << rule_parameters.TD_annealing_count_up_smaller_than_below << endl;
+			direction << "DT up is larger than down for annealing: " << rule_parameters.DT_annealing_count_up_larger_than_below << endl;			
+			direction << "DT up is smaller than down for annealing: " << rule_parameters.DT_annealing_count_up_smaller_than_below << endl;
+			direction.close();
+
+			check_debundling_information();
+			//check_T_D_distance();
+			rule_parameters.polymer_sequence_average_length = (double)(rule_parameters.Z-(double)rule_parameters.Z_ctp) / rule_structure.polymer_cluster_list.size();
+			statistics << rule_parameters.t << " ";
+			statistics << rule_parameters.Z_ctp << " ";
+			statistics << rule_parameters.polymer_sequence_average_length << " ";
+			statistics << rule_parameters.cluster_bound << " ";
+			statistics << rule_parameters.TT_annealing_sum << " ";
+			statistics << rule_structure.debundling_polymer_unit_pair_list.size() << " ";
+			statistics << rule_parameters.debundle_pair_TT << " ";
+			statistics << rule_parameters.debundle_pair_TD << " ";
+			statistics << rule_parameters.debundle_pair_DD << " ";
+			statistics << rule_parameters.T_sum << " ";
+			statistics << rule_parameters.D_sum << " ";
+			//statistics << rule_parameters.TT_fragmentation_sum+ rule_parameters.TT_depolymerize_end_sum << " ";
+			//statistics << rule_parameters.TD_fragmentation_sum + rule_parameters.TD_depolymerize_end_sum<< " ";
+			//statistics << rule_parameters.DD_fragmentation_sum + rule_parameters.DD_depolymerize_end_sum << " ";
+			statistics << rule_parameters.total_ftsZ_lifetime / rule_parameters.total_ftsZ_count << " ";
+			statistics << rule_parameters.bundling_sum <<" ";
+			statistics << rule_parameters.bundling_inverse_sum << " ";
+			statistics << rule_parameters.debundling_sum << " ";
+			statistics << rule_parameters.debundling_inverse_sum << " ";
+			statistics << rule_parameters.TTT_sum_total <<  " ";
+			statistics << rule_parameters.TTD_sum_total << " ";
+			statistics << rule_parameters.DTD_sum_total << " ";
+			statistics << rule_parameters.TTT_hydrolysys_rate<< " ";
+			statistics << rule_parameters.TT_depolymerize_minus_rate<< " ";
+			statistics << rule_parameters.Z - rule_parameters.Z_ctp - rule_structure.polymer_cluster_list.size() << " ";
+			statistics << rule_parameters.average_T_distance << " ";
+			statistics << rule_parameters.average_D_distance << " ";
+			statistics << rule_structure.polymer_bundle_list.size()<<endl;
+			
+
+			//update in real time 
+			/*double effective_hydrolysis_rate = ;
+			double effective_depolymerize_rate = ;*/
+
+			
+			
+			validate_diffusion_propensity();
+
+			//cout << "time hit: " << rule_parameters.t;
+			//output();
+			//output(fout);
+			//cout << "Time: " << rule_parameters.t << endl;
+		/*	cout << "available anchoring anchor: " << rule_parameters.empty_anchor_unit_num << endl;
+			cout << "available polymerize end: " << rule_parameters.polymerize_end_sum << endl;
+			cout << "available TT depolymerize end: " << rule_parameters.TT_depolymerize_end_sum << endl;
+			cout << "available TT fragmentation end: " << rule_parameters.TT_fragmentation_sum << endl;
+			cout << "available diffusion direction sum: " << rule_parameters.polymer_diffusion_propensity << endl;
+			cout << "available empty anchor diffusion direction sum: " << rule_parameters.empty_anchor_diffusion_direction_sum << endl;
+			cout << "available attatch anchor sum: " << rule_parameters.emtpy_anchor_attatch_sum << endl;*/
+			//system("pause");
+			tjudge = rule_parameters.t + tdelta;
+			//fout.close();
+			
+			//cout << rule_parameters.empty_anchor_unit_num << endl;
+			//cout << tjudge << endl;
+		}
+		if (rule_parameters.sumps != 0)
+		{
+			
+			
+			//cout << "output:" << endl;
+			double start = omp_get_wtime();
+			//fout << "Time: " << rule_parameters.t << endl;
+			if (rule_parameters.t > ttemp)
+			{
+				double t = rule_parameters.t;
+				cout << t << endl;
+				cout << "Time: " << rule_parameters.t << ";";
+				cout << "FtsZ: " << rule_parameters.Z_ctp << ";";
+				cout << "Bleached FtsZ: " << rule_parameters.bleached_Z << ";";
+				cout << "Number of Polymer Bundle:" << rule_structure.polymer_bundle_list.size() << ";";
+				cout << "effective hydrolysis rate:" << (rule_parameters.TTT_sum_total*rule_parameters.TTT_hydrolysys_rate + rule_parameters.TTD_sum_total*rule_parameters.TTD_hydrolysys_rate + rule_parameters.DTD_sum_total*rule_parameters.DTD_hydrolysys_rate) /
+					(rule_parameters.TTT_sum_total + rule_parameters.TTD_sum_total + rule_parameters.DTD_sum_total) <<" hydrolysis_TTT rate:"<<rule_parameters.TTT_hydrolysys_rate<< ";";
+				cout <<" effective depolymerization rate:"<< (rule_parameters.TT_depolymerize_minus_end_sum*rule_parameters.TT_depolymerize_minus_rate + rule_parameters.TD_depolymerize_minus_end_sum*rule_parameters.TD_depolymerize_minus_rate + rule_parameters.DD_depolymerize_minus_end_sum*rule_parameters.DD_depolymerize_minus_rate) /
+					(rule_parameters.TT_depolymerize_minus_end_sum + rule_parameters.TD_depolymerize_minus_end_sum + rule_parameters.DD_depolymerize_minus_end_sum) <<" depolymerization TT minus rate:"<<rule_parameters.TT_depolymerize_minus_rate<< endl;
+				ttemp += tdelta2;
+			}
+			
+			select_and_execute();
+			if (rule_parameters.event_analysis == 4)
+			{
+				analyse_biased_diffusion_propensity();
+			}
+			//validate_diffusion_propensity();
+			double end = omp_get_wtime();
+			rule_parameters.time[num_of_rules] += (end - start);
+			//validate_diffusion_propensity();
+			/*fout << "available anchoring anchor: " << rule_parameters.empty_anchor_unit_num << endl;
+			fout << "available polymerize end: " << rule_parameters.polymerize_end_sum << endl;
+			fout << "available TT depolymerize end: " << rule_parameters.TT_depolymerize_end_sum << endl;
+			fout << "available diffusion direction sum: " << rule_parameters.polymer_diffusion_propensity << endl;*/
+			//if (rule_parameters.t > tbase)
+			//{
+			//	break;
+			//	cout << "available anchoring anchor: " << rule_parameters.empty_anchor_unit_num << endl;
+			//	//cout << "available polymerize end: " << rule_parameters.polymerize_end_sum << endl;
+			//	cout << "available TT depolymerize end: " << rule_parameters.TT_depolymerize_end_sum << endl;
+			//	cout << "available TT fragmentation end: " << rule_parameters.TT_fragmentation_sum << endl;
+			//	cout << "available diffusion direction sum: " << rule_parameters.polymer_diffusion_propensity << endl;
+			//	cout << "available anchor diffusion direction sum: " << rule_parameters.empty_anchor_diffusion_direction_sum << endl;
+			//	cout << "available attatch anchor sum: " << rule_parameters.emtpy_anchor_attatch_sum << endl;
+
+			//	//output(fout);
+			//	//output();
+			//}
+			//check_direction();
+			//check();
+			//check_polymerize_information();
+			//test_annealing();
+			//test_TT_Fragmentation_sum();
+			//check_bundling();
+			
+			default_random_engine gen(rule_parameters.step_num);
+			uniform_real_distribution<> tempf(0, 1);//here is for the time part
+			double temp = 0;
+			do
+			{
+				temp = tempf(gen);
+			} while (temp == 0);
+
+			double deltat = (1.0 / rule_parameters.sumps)*log(1.0 / temp);
+			rule_parameters.t = rule_parameters.t + deltat;
+
+			
+
+
+
+
+			
+			//system("pause");
+			
+		}
+		else
+		{
+			////snprintf(output_dir, sizeof(output_dir), ".//%s%3.3lf/", "time", rule_parameters.t);
+			//_mkdir(output_dir);
+			//snprintf(fname, sizeof(fname), "%s%s", output_dir, "testmatrix.txt");
+			//fout.open(fname);
+			//output(fout);
+			//fout.close();
+			break;
+		}
+		
+		
+		
+
+	}
+	/*for (int i = 0; i < column_num; i++)
+	{
+		for (int j = 0; j < row_num; j++)
+		{
+			cout << rule_structure.Mark[i][j] <<" ";
+		}
+		cout << endl;
+	}*/
+	//system("pause");
+	diffusion_statistics.close();
+	fragmentation_statistics.close();
+	depolymerization_statistics.close();
+	fout.close();
+	statistics.close();
+	length_distribution.close();
+	length_column.close();
+	averaged_output.close();
+	polymerize_statistics.close();
+	remove_statistics.close();
+	rule_parameters.event_output.close();
+
+
+	//anchor_grid.output();
+	//Initialize_Anchor();
+	cin;
+}
